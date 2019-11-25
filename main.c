@@ -68,7 +68,11 @@ int main(int argc, const char* args[]) {
 
     AVPacket* packet = av_packet_alloc();
     int flag = 0;
-    while (av_read_frame(fmt, packet) >= 0 && packet->stream_index == stream_idx) {
+    while (av_read_frame(fmt, packet) >= 0) {
+        if (packet->stream_index != stream_idx) {
+            av_packet_unref(packet);
+            continue;
+        }
         ret_code = avcodec_send_packet(codec_ctx, packet);
         if (ret_code < 0) {
             fprintf(stderr, "warning: failed to send packet to codec (%d)\n", ret_code);
